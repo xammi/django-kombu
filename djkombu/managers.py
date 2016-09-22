@@ -56,13 +56,9 @@ class MessageManager(models.Manager):
 
     def cleanup(self):
         cursor = self.connection_for_write().cursor()
-        try:
+        with transaction.atomic():
             cursor.execute("DELETE FROM %s WHERE visible=%%s" % (
                             self.model._meta.db_table, ), (False, ))
-        except:
-            transaction.rollback_unless_managed()
-        else:
-            transaction.commit_unless_managed()
 
     def connection_for_write(self):
         if connections:
